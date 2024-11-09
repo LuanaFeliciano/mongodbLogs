@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <title>Gerador de Logs - Minardi</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Gerador de Logs - Minardi</h1>
+        <p class="text-center">Geração de logs no MongoDB para análise de métricas.</p>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div id="card1" class="card-action">
+                    <i class="fa fa-server" style="color:#4CAF50;"></i>
+                    <h5 class="text-center">Ação de Monitoramento</h5>
+                    <p class="text-center">Clique para gerar um log de navegação com tempo e URL.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div id="card2" class="card-action">
+                    <i class="fa fa-exclamation-triangle" style="color:#FFC107;"></i>
+                    <h5 class="text-center">Erro de Navegação</h5>
+                    <p class="text-center">Clique para gerar um log de erro, incluindo a página e o tempo de falha.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div id="card3" class="card-action">
+                    <i class="fa fa-bug" style="color:#F44336;"></i>
+                    <h5 class="text-center">Gerar Bug de Sessão</h5>
+                    <p class="text-center">Clique para gerar um log de erro durante uma sessão de navegação.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <i class="fa fa-spinner fa-spin"></i> Gerando log... e tentando não causar problemas.
+        </div>
+
+        <hr>
+
+        <h4>Logs Gerados</h4>
+        <div id="logsContainer"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+
+        function gerarLog(action, details, page) {//aqui é a funcao para realizar o post na api, para gravar a log 
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            const logData = {
+                acao: action,
+                detalhes: details,
+                sessionId: `session${Math.floor(Math.random() * 5)}`,
+                pageUrl: `${window.location.href}${page}`, 
+                timestamp: new Date().toISOString(),
+                duracao: Math.floor(Math.random() * 100) + 30,
+            };
+
+            axios.post('api.php', logData)
+            .then(response => {
+                if (response.data.status === 'success') {
+                    buscarLogs();
+                    alert('Log gerado com sucesso!');
+                } else {
+                   
+                    alert('Erro ao gerar log...');
+                }
+            })
+            .catch(error => {
+                console.error('Erro na api', error);
+                alert('Erro na api  mongodb');
+            }).finally(() => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            });
+        }
+
+        function buscarLogs() {//aqui e a funcao para aparecer os logs gravados do mongo na tela
+            axios.get('api.php')
+            .then(response => {
+                const logs = response.data.logs;
+                const logsContainer = document.getElementById('logsContainer');
+                logsContainer.innerHTML = '';
+
+                logs.forEach(log => {
+                    
+                    const logCard = `
+                        <div class="log-item">
+                            <span>Ação:</span> ${log.acao} <br>
+                            <span>Detalhes:</span> ${log.detalhes} <br>
+                            <span>URL:</span> ${log.pageUrl} <br>
+                            <span>Hora:</span> ${log.timestamp} <br>
+                            <span>Duração:</span> ${log.duracao} segundos <br>
+                            <span>Session ID:</span> ${log.sessionId} <br><br>
+                        </div>
+                    `;
+                    
+                    logsContainer.innerHTML += logCard;
+                });
+                
+            })
+            .catch(error => {
+                console.error('Erro ao carregar logs:', error);
+                alert('Erro ao carregar os logs');
+            });
+        }
+
+        document.getElementById('card1').addEventListener('click', function() {
+            const pageUrl = 'monitoramento';
+            gerarLog('Navegação Monitorada', 'Usuário acessou a página com sucesso.', 'monitoramento');
+        });
+
+        document.getElementById('card2').addEventListener('click', function() {
+            const pageUrl = 'erro'; 
+            gerarLog('Erro de Navegação', 'Erro ao carregar página, falha no recurso X.', 'erro');
+        });
+
+        document.getElementById('card3').addEventListener('click', function() {
+            const pageUrl = 'bug';
+            gerarLog('Bug na Sessão', 'Bug ocorrido durante a interação com a página de login.', 'bug');
+        });
+
+
+        buscarLogs();
+    </script>
+</body>
+</html>
