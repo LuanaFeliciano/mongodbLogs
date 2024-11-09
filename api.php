@@ -53,6 +53,7 @@ function gravaLog($collection, $data){//GRAVAR LOG NO BANCO MONGODB
     $pageUrl = $data['pageUrl']; 
     $duracao = $data['duracao'];
     $timestamp = date('Y-m-d H:i:s');
+    $navegador = $data['navegador'];
 
     $logData = [
         'acao' => $acao,
@@ -60,7 +61,8 @@ function gravaLog($collection, $data){//GRAVAR LOG NO BANCO MONGODB
         'detalhes' => $detalhes,
         'sessionId' => $sessionId,
         'pageUrl' => $pageUrl,      
-        'duracao' => $duracao
+        'duracao' => $duracao,
+        'navegador' => $navegador
     ];
 
     $result = $collection->insertOne($logData);

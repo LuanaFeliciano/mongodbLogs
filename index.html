@@ -62,6 +62,7 @@
                 pageUrl: `${window.location.href}${page}`, 
                 timestamp: new Date().toISOString(),
                 duracao: Math.floor(Math.random() * 100) + 30,
+                navegador: navigator.userAgent
             };
 
             axios.post('api.php', logData)
@@ -93,12 +94,13 @@
                     
                     const logCard = `
                         <div class="log-item">
+                            <span>Session ID:</span> ${log.sessionId} <br>
                             <span>Ação:</span> ${log.acao} <br>
                             <span>Detalhes:</span> ${log.detalhes} <br>
                             <span>URL:</span> ${log.pageUrl} <br>
                             <span>Hora:</span> ${log.timestamp} <br>
                             <span>Duração:</span> ${log.duracao} segundos <br>
-                            <span>Session ID:</span> ${log.sessionId} <br><br>
+                            <span>Navegador:</span> ${log.navegador} <br>
                         </div>
                     `;
                     
